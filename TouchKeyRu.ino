@@ -1,26 +1,31 @@
-// Resistiven Touchscreen Panel als USB Macro Keypad
-// shortcuts programmierbare Keyboard
-// Frei Programmierbare USB Makro Tastatur
-// Arduino Leonardo Micro + Touchscreen Panel
+// Резистивная сенсорная панель в качестве USB Macro Keypad
+// программируемая клавиатура для горячих клавиш
+// Свободно программируемая USB-клавиатура для макросов
+// Arduino Leonardo Micro + сенсорная панель
+// Поддержка английского и русского языков
 
-// Befehlformat: "§", Befehl, Wert, Leerzeichen (Beispiel "Wort1§t1000 Wort2" Befehl warte 1 sekunde)
-// §p - Press         "§p0x80 "  Strg drücken
-// §r - Release       "§r0x80 "  Strg loslassen
-// §a - Release All   "§a "      Alle Tasten Loslassen
-// §w - Write         "§w0xB0 "  Enter klicken
-// §t - Timer         "§t3000  " 3 Sekunden abwarten
-// §l - Sprache       "§l0  "  0-Englisch 1-Andere
-// Scancodes Zuordnung bitte hier entnehmen
+// Страница проекта:  http://esp8266-server.de/keypadRU.html
+
+// Автор: Михаил Дворкин
+
+// формат команд: "§"- Начало команды, Команда, Партаметр, пробел -Конец команды  (Пример "слово1§t1000 цслово2" эта команда означает жди 1 секунду )
+// §p - Press         "§p0x80 "  нажать Strg
+// §r - Release       "§r0x80 "  отпустить Strg
+// §a - Release All   "§a "      отпустить все нажатые клавиши
+// §w - Write         "§w0xB0 "  напечатать ввод (enter)
+// §t - Timer         "§t3000  " 3 секунды ждать
+// §l - Sprache       "§l0  "   переключит на 0-английский 1-русский
+// Скан-коды смотрите здесь
 // https://github.com/MichaelDworkin/KeyboardMultiLanguage/blob/master/src/KeyboardMultiLanguage.h
 
 #include <stdint.h>
 #include <EEPROM.h>
 #include <TouchScreen.h>
 #include <KeyboardMultiLanguage.h>
-#include "KeyboardMappingRU.h"
+#include "KeyboardMappingRU.h"  // Таблица русской раскладки
 
 
-// ------------------- Touchscreen Panel Anschluss Zuordnung ----------------
+// ------------------- Распиновка Touchscreen Panel ----------------
 #define X1 A1
 #define X2 A3
 #define Y1 A0
@@ -33,26 +38,24 @@
   #define X2 A2
 */
 
-#define PIEZO_PIN 3  // Pin mit Pezowandler Piepser
+#define PIEZO_PIN 3  // номер ножки с Пьезо
 
 int kalibriere = 0;
 boolean losgelassen = 1;
 int KalibrWert[4];
 
-// ----------------- Hier bitte die Azahl der Spalten und Reien antragen -----------------
+// ----------------- Пожалуйста, здесь введите количество столбцов и строк  -----------------
 
-#define Reihen 3
-#define Spalten 4
+#define Reihen 3  // строк
+#define Spalten 4 // столбцов
 
-// ----------------- Befehle und Texte zugeordnet zum jeweiliger Zelle -------------------
-// ----------------- Zweidimensionales Array entspricht der Tabelle ----------------------
+// ----------------- Команды и тексты, присвоенны соответствующей ячейке -------------------
+// ----------------- Двумерный массив соответствует таблице клавиш ----------------------
 
+// открытие скайпа, поиск абонента, видеовызов
 #define skype "§p0x87 r§r0x87 §t100 \"C:\\Program Files (x86)\\Microsoft\\Skype for Desktop\\Skype.exe\"\n§t3000 §p0x80 §p0x81 s§t500 §a §t500 echo§t3000 §w0xD9 \n§p0x80 §p0x81 k§a "
-// strg hoch s Echo nach unten enter
-// STRG+E  Auflegen
+// открытие ардуино, открытие пследнего проекта, закрытие пустого окна
 #define arduino "§p0x87 r§r0x87 §t100 \"C:\\arduino-1.8.8\\arduino.exe\"\n§t12000 §w0x82 §t100 §w0xD9 §t100 §w0xD9 §t100 §w0xD9 §t100 §w0xD7 §t100 §w0xB0 §t500 §p0x82 §t100 §w0xb3 §t100 §r0x82 §p0x82 §p0xc5 §a "
-
-//
 
 const String data[Reihen][Spalten] =
 {
@@ -77,11 +80,10 @@ const String data[Reihen][Spalten] =
 TouchScreen ts = TouchScreen(X1, Y1, X2, Y2, 300);
 
 
-// ---------------- HEX String in Integer umwandeln  -----------------------
+// ---------------- преобразование HEX String в Integer -----------------------
 
 unsigned int hexToDec(String hexString)
 {
-
   unsigned int decValue = 0;
   int nextInt;
   hexString.toUpperCase();
@@ -103,33 +105,32 @@ void setup(void)
 {
   Serial.begin(115200);
   pinMode(PIEZO_PIN, OUTPUT);
-  Keyboard.language(Russian); 
+  Keyboard.language(Russian); // выбор языка /раскладки
   delay(1000);
-  EEPROM.get( 0 , KalibrWert );
-  if (KalibrWert[0] >= KalibrWert[1]  || KalibrWert[2] >= KalibrWert[3])
+  EEPROM.get( 0 , KalibrWert ); // считываем из памяти значения калибровки сенсорной панельи
+  if (KalibrWert[0] >= KalibrWert[1]  || KalibrWert[2] >= KalibrWert[3]) // если дурацкие значения
   {
-    //    Serial.println("Falsche Kalibrierwerte lade Default");
-    KalibrWert[0] = 0;
+    KalibrWert[0] = 0;                                                   // то загружаем значения по умолчанию
     KalibrWert[1] = 1000;
     KalibrWert[2] = 0;
     KalibrWert[3] = 1000;
   }
 }
 
-// ---------- Ausgabe des Textes über HID-Keybord und Ausführung der Befehle -----
+// ---------- Вывод текста через HID-клавиатуру и выполнение команд -----
 
 void KeyOutput(const String str)
 {
-  int pos = str.indexOf('§');
+  int pos = str.indexOf('§');   // находим начало первой команды
   while (pos >= 0)
   {
-    if (pos > 0) Keyboard.print(str.substring(0, pos - 1));
+    if (pos > 0) Keyboard.print(str.substring(0, pos - 1)); // выводим текст до команды и между командами
     str.remove(0, pos + 1);
-    char kode = str.charAt(0);
+    char kode = str.charAt(0); // выделяем команды
     pos = str.indexOf(' ');
-    String Daten = str.substring(1, pos);
+    String Daten = str.substring(1, pos); // выделяем параметр
     byte z;
-    switch (kode)             // Befehle
+    switch (kode)             // команды
     {
       case 'w':
         z = hexToDec(Daten);
@@ -155,39 +156,38 @@ void KeyOutput(const String str)
         break;
     }
     str.remove(0, pos + 1);
-    pos = str.indexOf('§');
+    pos = str.indexOf('§');  находим начало следующей команды
   }
-  if (str.length() > 0)Keyboard.print(str);
+  if (str.length() > 0)Keyboard.print(str); // выводим текст после команды
 }
 
 void loop(void) {
   TSPoint p = ts.getPoint(); // a point object holds x y and z coordinates
 
   // we have some minimum pressure we consider 'valid'
-  if (p.z < ts.pressureThreshhold) losgelassen = 1;
-  if (p.z > ts.pressureThreshhold && losgelassen)   // pressure of 0 means no pressing!
+  if (p.z < ts.pressureThreshhold) losgelassen = 1; // запоминаем отпускание сенсора
+  if (p.z > ts.pressureThreshhold && losgelassen)   // если нажато а раньше было отпущено то
   {
-    int x = map( p.x, KalibrWert[0], KalibrWert[1], 0, Spalten);
-    int y = map( p.y, KalibrWert[2], KalibrWert[3], 0, Reihen);
+    int x = map( p.x, KalibrWert[0], KalibrWert[1], 0, Spalten);  // вычесляем столбец
+    int y = map( p.y, KalibrWert[2], KalibrWert[3], 0, Reihen);   // вычесляем строку
     if (y < Reihen && x < Spalten)
     {
-      // Serial.println(data[y][x]);
-      digitalWrite(PIEZO_PIN, !digitalRead(PIEZO_PIN));
-      if (!kalibriere) KeyOutput(data[y][x]);
-
+      digitalWrite(PIEZO_PIN, !digitalRead(PIEZO_PIN));  // издаём щелчок
+      if (!kalibriere) KeyOutput(data[y][x]);            // если не в модусе отладки то печатаем данные
     }
-    else Serial.print("Reihen/Spalten position ausserhalb den Datenarray!");
-    losgelassen = 0;
+    else Serial.print("номер строки или столбца вне массива данных!");
+
+    losgelassen = 0;   // сенсор до сих пор нажат
     delay(300);
 
-    switch (kalibriere)             // Auswahlsteuerung
+    switch (kalibriere)             // контроль выбора калибровки и отладки
     {
       case 1:
         kalibriere = 2;
         KalibrWert[0] = p.x; // x min
         KalibrWert[2] = p.y; // y min
         delay(1000);
-        Serial.println("Unten Rechts");
+        Serial.println("в нижнем правом углу");
         break;
       case 2:
         kalibriere = 0;
@@ -195,7 +195,7 @@ void loop(void) {
         KalibrWert[1] = p.x; // x max
         KalibrWert[3] = p.y; // y max
         delay(1000);
-        Serial.println("Kalibrierung Abgeschlossen");
+        Serial.println("калибровка окончина");
         EEPROM.put( 0, KalibrWert);
         Serial.println("X Min \tX Max \tY Min \tY Max");
         Serial.print(String(KalibrWert[0]) + "\t");
@@ -205,11 +205,11 @@ void loop(void) {
         delay(1000);
         break;
       case 3:
-        Serial.println("Messwerte:");
+        Serial.println("значения аналого-цифрового преобразователя:");
         Serial.print("X = "); Serial.print(p.x);
         Serial.print("\tY = "); Serial.print(p.y);
         Serial.println("  ");
-        Serial.println("Kalibrierte Tabellenwerte:");
+        Serial.println("откалиброванные и пересчитанные в таблицу значения:");
         Serial.print("X = ");
         Serial.print(x);
         Serial.print("\tY = ");
@@ -221,34 +221,34 @@ void loop(void) {
   }
 
 
-  // 2 Befehle über Serielle Terminal
-  // Zeichen "k"- Kalibrieren
-  // Zeichen "r"- Absolute Positonswerte und Rasterwerte anzeigen
+  // 2 команды через последовательный терминал
+  // символ "k" - калибровка
+  // символ "r" - показывает абсолютные значения положения и значения сетки
 
-  if (Serial.available())     //Wenn Eingabe erfolgt
+  if (Serial.available())           // Когда ввод сделан
   {
-    char  Wahl = Serial.read();     //Hole eingegebenes Zeichen
+    char  Wahl = Serial.read();     // Получить введенный знак
     Serial.flush();
-    Serial.println(Wahl);     //Zeige eingegebenes Zeichen
-    switch (Wahl)             //Auswahlsteuerung
+    Serial.println(Wahl);    
+    switch (Wahl)                   // контроль выбора
     {
-      case 'k':
+      case 'k':                     // старт калибровки
         kalibriere = 1;
-        Serial.println("Kalibriere");
-        Serial.println("Druecke:");
-        Serial.println("Oben Links");
+        Serial.println("калибровка");
+        Serial.println("Нажмите:");
+        Serial.println("В верхнем левом углу");
         break;
-      case 'r': // Rohdaten
+      case 'r':                   // старт вывода отладочной информации
         if (!kalibriere)
         {
           kalibriere = 3;
-          Serial.println("Positonswerte und Rasterwerte");
-          Serial.println("zurueck mir \"r\"");
+          Serial.println("Значения положения и значения сетки");
+          Serial.println("чтобы вернутся нажмите \"r\"");
         }
         else
         {
           kalibriere = 0;
-          Serial.println("USB-Keyboard wieder An");
+          Serial.println("USB-Клавиатура снова включина");
         }
         break;
     }
