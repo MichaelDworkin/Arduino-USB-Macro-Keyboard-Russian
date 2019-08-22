@@ -187,7 +187,7 @@ void loop(void) {
         KalibrWert[0] = p.x; // x min
         KalibrWert[2] = p.y; // y min
         delay(1000);
-        Serial.println(F("в нижнем правом углу"));
+        Serial.println(F("А теперь в нижнем правом углу\n"));
         break;
       case 2:
         kalibriere = 0;
@@ -236,7 +236,7 @@ void loop(void) {
         kalibriere = 1;
         Serial.println(F("калибровка"));
         Serial.println(F("Нажмите:"));
-        Serial.println(F("В верхнем левом углу)"));
+        Serial.println(F("В верхнем левом углу\n"));
         break;
       case 'r':                   // старт вывода отладочной информации
         if (!kalibriere)
