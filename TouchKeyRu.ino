@@ -175,7 +175,7 @@ void loop(void) {
       digitalWrite(PIEZO_PIN, !digitalRead(PIEZO_PIN));  // издаём щелчок
       if (!kalibriere) KeyOutput(data[y][x]);            // если не в модусе отладки то печатаем данные
     }
-    else Serial.print("номер строки или столбца вне массива данных!");
+    else Serial.print(F("номер строки или столбца вне массива данных!"));
 
     losgelassen = 0;   // сенсор до сих пор нажат
     delay(300);
@@ -187,7 +187,7 @@ void loop(void) {
         KalibrWert[0] = p.x; // x min
         KalibrWert[2] = p.y; // y min
         delay(1000);
-        Serial.println("в нижнем правом углу");
+        Serial.println(F("в нижнем правом углу"));
         break;
       case 2:
         kalibriere = 0;
@@ -195,9 +195,9 @@ void loop(void) {
         KalibrWert[1] = p.x; // x max
         KalibrWert[3] = p.y; // y max
         delay(1000);
-        Serial.println("калибровка окончина");
+        Serial.println(F("калибровка окончина"));
         EEPROM.put( 0, KalibrWert);
-        Serial.println("X Min \tX Max \tY Min \tY Max");
+        Serial.println(F("X Min \tX Max \tY Min \tY Max"));
         Serial.print(String(KalibrWert[0]) + "\t");
         Serial.print(String(KalibrWert[1]) + "\t");
         Serial.print(String(KalibrWert[2]) + "\t");
@@ -205,11 +205,11 @@ void loop(void) {
         delay(1000);
         break;
       case 3:
-        Serial.println("значения аналого-цифрового преобразователя:");
+        Serial.println(F("значения аналого-цифрового преобразователя:"));
         Serial.print("X = "); Serial.print(p.x);
         Serial.print("\tY = "); Serial.print(p.y);
-        Serial.println("  ");
-        Serial.println("откалиброванные и пересчитанные в таблицу значения:");
+        Serial.println(F("  "));
+        Serial.println(F("откалиброванные и пересчитанные в таблицу значения:"));
         Serial.print("X = ");
         Serial.print(x);
         Serial.print("\tY = ");
@@ -234,21 +234,21 @@ void loop(void) {
     {
       case 'k':                     // старт калибровки
         kalibriere = 1;
-        Serial.println("калибровка");
-        Serial.println("Нажмите:");
-        Serial.println("В верхнем левом углу");
+        Serial.println(F("калибровка"));
+        Serial.println(F("Нажмите:"));
+        Serial.println(F("В верхнем левом углу)"));
         break;
       case 'r':                   // старт вывода отладочной информации
         if (!kalibriere)
         {
           kalibriere = 3;
-          Serial.println("Значения положения и значения сетки");
-          Serial.println("чтобы вернутся нажмите \"r\"");
+          Serial.println(F("Значения положения и значения сетки"));
+          Serial.println(F("чтобы вернутся нажмите \"r\""));
         }
         else
         {
           kalibriere = 0;
-          Serial.println("USB-Клавиатура снова включина");
+          Serial.println(F("USB-Клавиатура снова включина"));
         }
         break;
     }
