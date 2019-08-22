@@ -21,7 +21,7 @@
 #include <stdint.h>
 #include <EEPROM.h>
 #include <TouchScreen.h>
-#include <KeyboardMultiLanguage.h>
+#include "KeyboardMultiLanguage.h" 
 #include "KeyboardMappingRU.h"  // Таблица русской раскладки
 
 
@@ -156,7 +156,7 @@ void KeyOutput(const String str)
         break;
     }
     str.remove(0, pos + 1);
-    pos = str.indexOf('§');  находим начало следующей команды
+    pos = str.indexOf('§'); // находим начало следующей команды
   }
   if (str.length() > 0)Keyboard.print(str); // выводим текст после команды
 }
