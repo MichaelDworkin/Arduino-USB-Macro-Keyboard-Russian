@@ -21,7 +21,7 @@
 #include <stdint.h>
 #include <EEPROM.h>
 #include <TouchScreen.h>
-#include "KeyboardMultiLanguage.h" 
+#include <KeyboardMultiLanguage.h>
 #include "KeyboardMappingRU.h"  // Таблица русской раскладки
 
 
@@ -53,13 +53,13 @@ int KalibrWert[4];
 // ----------------- Двумерный массив соответствует таблице клавиш ----------------------
 
 // открытие скайпа, поиск абонента, видеовызов
-#define skype "§p0x87 r§r0x87 §t100 \"C:\\Program Files (x86)\\Microsoft\\Skype for Desktop\\Skype.exe\"\n§t3000 §p0x80 §p0x81 s§t500 §a §t500 echo§t3000 §w0xD9 \n§p0x80 §p0x81 k§a "
+//#define skype "§p0x87 r§r0x87 §t100 \"C:\\Program Files (x86)\\Microsoft\\Skype for Desktop\\Skype.exe\"\n§t3000 §p0x80 §p0x81 s§t500 §a §t500 echo§t3000 §w0xD9 \n§p0x80 §p0x81 k§a "
 // открытие ардуино, открытие пследнего проекта, закрытие пустого окна
-#define arduino "§p0x87 r§r0x87 §t100 \"C:\\arduino-1.8.8\\arduino.exe\"\n§t12000 §w0x82 §t100 §w0xD9 §t100 §w0xD9 §t100 §w0xD9 §t100 §w0xD7 §t100 §w0xB0 §t500 §p0x82 §t100 §w0xb3 §t100 §r0x82 §p0x82 §p0xc5 §a "
+//#define arduino "§p0x87 r§r0x87 §t100 \"C:\\arduino-1.8.8\\arduino.exe\"\n§t12000 §w0x82 §t100 §w0xD9 §t100 §w0xD9 §t100 §w0xD9 §t100 §w0xD7 §t100 §w0xB0 §t500 §p0x82 §t100 §w0xb3 §t100 §r0x82 §p0x82 §p0xc5 §a "
 
 const String data[Reihen][Spalten] =
 {
-  { "§l0 Test\n", "\\", skype, "§p0x80 e§r0x80 "},
+  { "§l0 Test\n", "\\", "", "§p0x80 e§r0x80 "},
   { "Sehr geherte Damen und Herren,\n", "Michael Dworkin\nReichstr. 18\n42281 Wuppertal", "Mit freundlichen Grüßen\nMichael Dworkin", "Bitte Bestellen" },
   { "1", "§l0 §p0x83 §t100 r§r0x83 §t1000 notepad.exe\n§t1000 §p0x83 §t100 §w0xDA §r0x83 ", "§p0x83  §r0x83 §t500 §l0 I can eat glass and it doesn't hurt me.\n\n", "§p0x83  §r0x83 §t500 §l1 Я могу есть стекло, оно мне не вредит.\n\n§p0x83  §r0x83 §t500 "},
 };
